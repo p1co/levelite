@@ -46,15 +46,16 @@ class Database():
             return False
 
     # Modifies a record
-    # Input: 'username', (column, value)
+    # Input: 'username', *[column, value]
     # Output: None
-    def mod_record(self, author, col, val):
-        mod_record = """UPDATE {table} SET {column}="{value}" WHERE username="{author}"
-                     """.format(table=self.table,
-                                column=col,
-                                value=val,
-                                author=author)
-        self.sql_action(mod_record)
+    def mod_record(self, author, *modify):
+        for item in modify:
+            mod_record = """UPDATE {table} SET {column}="{value}" WHERE username="{author}"
+                         """.format(table=self.table,
+                                    column=item[0],
+                                    value=item[1],
+                                    author=author)
+            self.sql_action(mod_record)
 
     # Retrieves a single record
     # Input: 'username'
@@ -77,7 +78,7 @@ class Database():
     def get_all_record(self):
         conn = self.connect()
         cur = conn.cursor()
-        get_record = """SELECT * from {table}
+        get_record = """SELECT * from {table} ORDER BY "xp" DESC
                      """.format(table=self.table)
         try:
             with conn:

@@ -22,18 +22,47 @@ def on_ready():
     print(client.user.id)
     print('------')
 
-now_time = datetime.now()
+async def calc_last_msg(last_msg):
+    mesg_time = datetime.strptime(last_msg, cfg['time_fmt'])
+    test_time = datetime.now() - timedelta(seconds=cfg['time_to_wait'])
+    return True if mesg_time < test_time else False
+
+# Outputs usernames organized by level
+async def levels(count=100):
+    results = db.get_all_record()
+    print("----------")
+    for user in results:
+        print("{name} - {xp}".format(name=user[0], xp=user[1]))
 
 @client.event
 async def on_message(message):
-    if not db.get_record(message.author):
-        db.add_record(message.author, datetime.now())
+    # Do not continue if a bot sent the message
+    if message.author.bot:
+        return
+
+    user = db.get_record(message.author)
+
+    # If no user entry is found in the database
+    if not user:
+        db.add_record(message.author, str(datetime.now().strftime(cfg['time_fmt'])))
         print("Added {user}".format(user=message.author))
+
+    # If a user exists in the database
     else:
-        db.mod_record(message.author, "xp", randint(15, 25))
-        db.mod_record(message.author, "last_msg", datetime.now())
-        print("Updated {user}".format(user=message.author))
-    print(db.get_record(message.author))
+        time_calc = await calc_last_msg(user[2])
+        if time_calc:
+            db.mod_record(message.author,
+                          ["xp", user[1]+randint(15, 25)],
+                          ["last_msg", str(datetime.now().strftime(cfg['time_fmt']))])
+            print("Updated {user}".format(user=message.author))
+        else:
+            print("No exp added to {}".format(message.author))
+
+        # Code a thingy to check if user surpassed level threshold
+    #print(db.get_record(message.author))
+
+    if message.content.startswith('!levels'):
+        await levels()
 
     if message.content.startswith('!purge'):
         deleted = await client.purge_from(channel=message.channel,before=now_time)
