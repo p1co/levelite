@@ -1,5 +1,7 @@
 import discord
 import asyncio
+import requests
+import json
 from datetime import datetime, timedelta
 from yaml import load
 from random import randint
@@ -23,17 +25,51 @@ def on_ready():
 
 # Compare last user's message timestamp to
 # current time minus admin set frequency
-async def calc_last_msg(last_msg):
+def calc_last_msg(last_msg):
     mesg_time = datetime.strptime(last_msg, cfg['time_fmt'])
     test_time = datetime.now() - timedelta(seconds=cfg['time_to_wait'])
     return mesg_time < test_time
 
 # Outputs usernames organized by level
-async def levels(srv, count=100):
-    results = db.get_all_record()
-    print("-----{}-----".format(srv))
-    score = ["{} - {}".format(user[0], user[4]) for user in results]
+async def get_levels():
+    results = db.get_all_record(thing="rowid, author")
+    score = []
+    for user in results:
+        u_stat = await user_data(user[1])
+
+        u_string = (':small_blue_diamond: {rank:<5}'
+                    '{plr:30} {levels:30}  '
+                    'Level **{lvl}**'.format(
+                        rank=u_stat['rank'],
+                        plr='**{}** #{}'.format(u_stat['name'], u_stat['disc']),
+                        levels='{}/{} **XP** \[{}\]'.format(
+                            u_stat['xp_in_current_level'],
+                            u_stat['xp_until_next_level'],
+                            u_stat['xp']),
+                        lvl=u_stat['lvl']))
+
+        score.append(u_string)
     return score
+
+async def user_data(plr):
+    user = db.get_record(plr)
+    if not user:
+        return False
+
+    xp_lvl = player_level(user['xp'])
+
+    report = {"author":user['author'],
+              "avatar":user['avatar'],
+              "disc":user['disc'],
+              "name":user['display'],
+              "lvl":xp_lvl[0],
+              "xp":user['xp'],
+              "xp_in_current_level":xp_lvl[1],
+              "xp_until_next_level":calc_level_xp(xp_lvl[0]),
+              "rank":db.find_user_rank(user['author'])[0],
+              "count":db.count_recs()}
+
+    return report
 
 # Calculate how much exp is needed to reach a level
 def calc_level_xp(lvl):
@@ -48,112 +84,142 @@ def player_level(xp):
         level += 1
     return (level, remaining_xp)
 
-counter = 0
+def create_player(player, nowdate):
+    db.add_record(player,
+                  player.display_name,
+                  player.discriminator,
+                  player.avatar_url,
+                  str(nowdate.strftime(cfg['time_fmt'])))
+    print("Added {user}".format(user=player))
+
+# Announce to the chat room the level up
+async def print_congrats(player, channel):
+    await client.send_message(channel, str(player) + " leveled up!!!!")
+
+# update player info
+async def mod_player(player, user, nowdate, channel):
+    # Check if message sent outside out of bounds time
+    last_msg = user['last_msg']
+    time_calc = calc_last_msg(last_msg)
+
+    xp = user['xp']
+    lvl = player_level(xp)[0]
+    if time_calc:
+        grant_xp = randint(15, 25)
+        xp = xp + grant_xp
+        temp_lvl = player_level(xp)[0]
+        if int(temp_lvl) > int(lvl):
+            await print_congrats(player, channel)
+        last_msg = str(nowdate.strftime(cfg['time_fmt']))
+        print("Updated {plr}".format(plr=player))
+    else:
+        print("No exp added to {plr}".format(plr=player))
+
+    db.mod_record(player,
+                  ["display", player.display_name],
+                  ["avatar", player.avatar_url],
+                  ["disc", player.discriminator],
+                  ["xp", xp],
+                  ["last_msg", last_msg])
+
+async def action_message(message):
+    player = message.author
+    nowdate = datetime.now()
+    user = db.get_record(player)
+    if not user:
+        create_player(player, nowdate)
+    else:
+        await mod_player(player, user, nowdate, message.channel)
+
+async def setxp(message):
+    if message.mentions:
+        target = message.mentions[0]
+    else:
+        return
+
+    msg_split = message.content.split()
+    if len(msg_split) != 3:
+        await client.send_message(message.channel,
+                                  "Usage: !setxp @target numeric_value")
+        return
+    elif not msg_split[2].isdigit():
+        await client.send_message(message.channel,
+                                  "ERROR: XP is a number .. people today.")
+        return
+    else:
+        xp_to_set = msg_split[2]
+        db.mod_record(target, ["xp", xp_to_set])
+        await client.send_message(
+                message.channel,
+                "Set " + str(target) + "'s xp to " + xp_to_set + ".")
+    return
+
+
+async def levels(message):
+    title = "**" + message.server.name + "**" + " leaderboard:"
+    msg_fmt = await get_levels()
+    msg = "\n".join(msg_fmt)
+    em = discord.Embed(title=title, description=msg, colour=0x000FF)
+    em.set_author(name='', icon_url=message.server.icon_url)
+    await client.send_message(message.channel, embed=em)
+    return
+
+
+async def rank(message):
+    player = message.author
+    if message.mentions:
+        player = message.mentions[0]
+
+    u_stat = await user_data(player)
+
+    response = ('**{name}**\'s rank > '
+                '**LEVEL {lvl}** | '
+                '**XP {xp_in_current_level}/{xp_until_next_level}** | '
+                '**TOTAL XP {total_xp}** | '
+                '**Rank {rank}/{user_count}**'.format(
+            name=u_stat['name'],
+            lvl=u_stat['lvl'],
+            xp_in_current_level=u_stat['xp_in_current_level'],
+            xp_until_next_level=u_stat['xp_until_next_level'],
+            total_xp=u_stat['xp'],
+            rank=u_stat['rank'],
+            user_count=u_stat['count']))
+
+    print(response)
+
+    em = discord.Embed(description=response, colour=0x000FF)
+    em.set_author(name='', icon_url=message.server.icon_url)
+    await client.send_message(message.channel, embed=em)
+    return
+
+
 @client.event
 async def on_message(message):
-    global counter
-    counter += 1
-    if counter%15 == 0: 
-        msg = await levels(message.server.name)
-        print("\n".join(msg))
-
     # Do not continue if a bot sent the message
     if message.author.bot:
         return
 
-    player = message.author
-
-    # Capture time message received
-    nowdate = datetime.now()
-
-    # Retrieve a user record if it exists
-    user = db.get_record(player)
-
-    # If no user record is found in the database
-    if not user:
-        db.add_record(player,
-                      player.display_name,
-                      player.discriminator,
-                      player.avatar_url,
-                      str(nowdate.strftime(cfg['time_fmt'])))
-        print("Added {user}".format(user=player))
-
-    # If a user record exists in the database
-    else:
-        # update player info
-        db.mod_record(player,
-                      ["display", player.display_name],
-                      ["avatar", player.avatar_url],
-                      ["disc", player.discriminator],
-                      ["level", player_level(user['xp'])[0]])
-
-        # Check if message sent outside out of bounds time
-        time_calc = await calc_last_msg(user['last_msg'])
-        if time_calc:
-            db.mod_record(player,
-                          ["xp", user['xp']+randint(15, 25)],
-                          ["last_msg", str(nowdate.strftime(cfg['time_fmt']))])
-            print("Updated {user}".format(user=player))
-        else:
-            print("No exp added to {plr}".format(plr=player))
-
-        # Code a thingy to check if user surpassed level threshold
+    ################
+    ### commands ###
+    ################
 
     if message.content.startswith('!levels'):
-        title = "**" + message.server.name + "**" + " leaderboard:"
-        msg_fmt = await levels(message.server.name)
-        msg = "\n".join(msg_fmt)
-        em = discord.Embed(title=title, description=msg, colour=0x000FF)
-        em.set_author(name='', icon_url=message.server.icon_url)
-        await client.send_message(message.channel, embed=em)
+        await levels(message)
 
-    if message.content.startswith('!count'):
+    # Returns the total number of stored records
+    elif message.content.startswith('!count'):
         await client.send_message(message.channel, str(db.count_recs()))
 
-#@command(pattern="(^!rank$)|(^!rank <@!?[0-9]*>$)",
-#         description="Get a player info and rank")
-    if message.content.startswith('!rank'):
-        if message.mentions:
-            player = message.mentions[0]
-        plr = db.get_record(player)
-        if plr == None:
-            return
+    # Prints one record
+    elif message.content.startswith('!rank'):
+        await rank(message)
 
-        xp = int(plr['xp'])
-        player_lvl = plr['level']
-        lvl_xp = calc_level_xp(player_lvl)
-        next_lvl_xp = calc_level_xp(player_lvl+1)
+    # Set xp for one player
+    elif message.content.startswith('!setxp'):
+        await setxp(message)
 
-#        print("xp {}\nlvl {}\nremain lvl xp {}\nnext lvl_xp {}".format(xp, player_lvl, lvl_xp[1], next_lvl_xp))
-
-        response = '{auth} : **{name}**\'s rank > **LEVEL {lvl}** | **XP {remain_lvl_xp}/{next_lvl_xp}** '\
-            '| **TOTAL XP {tot_xp}** | **Rank {rank}/{plr_count}**'.format(
-                auth=message.author,
-                name=player.name,
-                lvl=player_lvl,
-                remain_lvl_xp=lvl_xp,
-                next_lvl_xp=next_lvl_xp,
-                tot_xp=plr['xp'],
-                rank=777,
-                plr_count= db.count_recs()
-                )        
-        print(response)
-        em = discord.Embed(description=response, colour=0x000FF)
-        em.set_author(name='', icon_url=message.server.icon_url)
-        await client.send_message(message.channel, embed=em)
-
-    if message.content.startswith('!setxp'):
-        if message.mentions:
-            target = message.mentions[0]
-        else:
-            return
-
-        msg_split = message.content.split()
-        if len(msg_split) > 3:
-            return
-        else:
-            xp_to_set = msg_split[2]
-        db.mod_record(target, ["xp", xp_to_set])
-        await client.send_message(message.channel, "Set " + str(target) + "'s xp to " + xp_to_set + ".")
+    # Create a new record or modify an existing record with exp
+    else:
+        await action_message(message)
 
 client.run(cfg['token'])
