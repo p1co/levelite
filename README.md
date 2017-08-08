@@ -1,6 +1,6 @@
 # levelite
 
-Currently unusable.
+Currently: somewhat usable, if you like pain.
 
 settings.cfg should look like this:
 token: your_discord_bot_token
