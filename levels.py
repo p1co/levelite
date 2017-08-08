@@ -18,7 +18,7 @@ srv = Server(db, cmd)
 class display_levels(object):
     @cherrypy.expose
     def index(self):
-        return srv.print_this_motherfucker()
+        return srv.jinja2_main()
 
 @client.async_event
 async def on_ready():

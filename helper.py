@@ -49,12 +49,9 @@ class Helper(object):
     
     # Calculate the player level
     def player_level(self, xp):
-        print("player_level() -> ",xp)
         remaining_xp = int(xp)
         level = 0
-        remaining = self.calc_level_xp(level)
-        while remaining_xp >= remaining:
-            asyncio.sleep(0)
+        while remaining_xp >= self.calc_level_xp(level):
             remaining_xp -= self.calc_level_xp(level)
             level += 1
         return (level, remaining_xp)
