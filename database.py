@@ -25,34 +25,38 @@ class Database():
             print(e)
 
     # Creates initial table used in the levels database
-    def create_table(self):
-        params = ('author TEXT PRIMARY KEY,'
+    def create_table(self, role):
+        params = ('uid TEXT PRIMARY KEY,'
+                  'author TEXT,'
+                  'role TEXT NOT NULL DEFAULT \'{starting_role}\','
+                  'rep TEXT DEFAULT 0,'
                   'display TEXT,'
                   'disc TEXT,'
-                  'avatar TEXT,'
                   'xp INTEGER DEFAULT 0,'
-                  'level INTEGER DEFAULT 0,'
-                  'last_msg TEXT')
+                  'avatar TEXT DEFAULT 0,'
+                  'last_msg TEXT'.format(starting_role=role))
         new_table = """CREATE TABLE IF NOT EXISTS {table}({params})
                     """.format(table=self.table, params=params)
         self.sql_action(new_table)
 
     # Add a new author to the table
-    def add_record(self, author, display, disc, avatar, msg_time):
-        print("{}, {}, {}, {}, {}".format(author, display, disc, avatar, msg_time))
+    def add_record(self, uid, author, role, display, disc, avatar, msg_time):
         conn = self.connect()
-        new_record = """INSERT INTO {table} (author, display, disc, avatar, last_msg) VALUES 
-                        ("{author}",
-                         "{display}",
-                         "{disc}",
-                         "{avatar}",
-                         "{msg_time}") 
+        tbl_param = "uid, author, role, display, disc, avatar, last_msg"
+        val_param = ('"{uid}", "{author}", "{role}", "{display}",'
+                     '"{disc}", "{avatar}", "{msg_time}"'.format(
+                          uid=uid,
+                          author=author,
+                          role=role,
+                          display=display,
+                          disc=disc,
+                          avatar=avatar,
+                          msg_time=msg_time))
+
+        new_record = """INSERT INTO {table} ({tbl_param}) VALUES ({val_param})
                      """.format(table=self.table,
-                                author=author,
-                                display=display,
-                                disc=disc,
-                                avatar=avatar,
-                                msg_time=msg_time)
+                                tbl_param=tbl_param,
+                                val_param=val_param)
         try:
             with conn:
                 conn.execute(new_record)
@@ -75,13 +79,14 @@ class Database():
     # Retrieves a single record
     # Input: 'author'
     # Output ('text', int, 'text')
-    def get_record(self, author):
+    def get_record(self, author, field="*"):
         conn = self.connect()
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        get_record = """SELECT * FROM {table} WHERE author="{author}"
+        get_record = """SELECT {field} FROM {table} WHERE author="{author}"
                      """.format(table=self.table,
-                                author=author)
+                                author=author,
+                                field=field)
         try:
             with conn:
                 cur.execute(get_record)
@@ -91,17 +96,31 @@ class Database():
         return cur.fetchone()
 
     # Will be used for "levels" printout
-    def get_all_record(self):
+    def get_all_record(self, thing="*"):
         conn = self.connect()
         cur = conn.cursor()
-        get_record = """SELECT * from {table} ORDER BY "xp" DESC
-                     """.format(table=self.table)
+        get_record = """SELECT {thing} from {table} ORDER BY "xp" DESC
+                     """.format(thing=thing, table=self.table)
         try:
             with conn:
                 cur.execute(get_record)
-        except sqllite3.Error as e:
+        except sqlite3.Error as e:
             print(e)
         return cur.fetchall()
+
+    def find_user_rank(self, target):
+        print("finding user rank for {}".format(target))
+        conn = self.connect()
+        cur = conn.cursor()
+        get_record = """SELECT rowid FROM {table} WHERE author="{author}" ORDER BY "xp" DESC
+                     """.format(table=self.table, author=target)
+        try:
+            with conn:
+                cur.execute(get_record)
+        except sqlite3.Error as e:
+            print(e)
+        return cur.fetchone()
+
 
     def count_recs(self):
         conn = self.connect()
@@ -111,7 +130,7 @@ class Database():
         try:
             with conn:
                 cur.execute(get_record)
-        except sqllite3.Error as e:
+        except sqlite3.Error as e:
             print(e)
         # Using len() on a larger db might cause some slowdown
         # I'll refactor if needed
