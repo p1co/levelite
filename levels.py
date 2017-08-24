@@ -13,7 +13,7 @@ TEST = False
 cmd = Commands(discord, client, cfg_loc="settings.cfg")
 cfg = cmd.cfg
 db = cmd.db
-srv = Server(db, cmd)
+srv = Server()
 
 class display_levels(object):
     @cherrypy.expose
@@ -49,7 +49,7 @@ async def print_congrats(player, channel, lvl):
 
 async def action_message(message):
     player = message.author
-    user = db.get_record(player)
+    user = db.get_record(player.id)
     if not user:
         await cmd.create_player(player, cmd.get_role(0))
     else:
@@ -79,7 +79,7 @@ async def on_message(message):
     elif message.content.startswith('!setxp'):
         await cmd.setxp(message)
 
-    # Create a new record or modify an existing record with exp
+    #Create a new record or modify an existing record with exp
     else:
         await action_message(message)
 

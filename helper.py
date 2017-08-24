@@ -3,7 +3,7 @@ from yaml import load
 from database import Database
 
 class Helper(object):
-    def __init__(self, cfg_loc):
+    def __init__(self, cfg_loc="settings.cfg"):
         self.roles = {}
         self.cfg = self.load_cfg(cfg_loc)
         self.db = Database(self.cfg['database'], self.cfg['table'])
@@ -12,36 +12,26 @@ class Helper(object):
         with open(cfg_loc) as cfg_file:
             return load(cfg_file)
 
-    def user_data(self, plr):
-        user = self.db.get_record(plr)
-        if not user:
-            return False
-    
+    def convert_user(self, user):
         # Calculate players level and percent of exp in curr elvel
         xp_lvl = self.player_level(user['xp'])
         next_lvl = self.calc_level_xp(xp_lvl[0])
         if xp_lvl[1] == 0:
             xp_pct = 0
         else:
-            xp_pct = int(next_lvl/xp_lvl[1])*100
+            xp_pct = 100 * float(xp_lvl[1])/float(next_lvl)
+        user.update(
+                {"level":xp_lvl[0],
+                 "xp_in_lvl":xp_lvl[1],
+                 "xp_pct":xp_pct,
+                 "xp_next_lvl":next_lvl})
+        return user
 
-        return {
-              "uid":user['uid'],
-              "author":user['author'],
-              "role":user['role'],
-              "level":xp_lvl[0],
-              "name":user['display'],
-              "disc":user['disc'],
-              "xp":user['xp'],
-              "xp_in_lvl":xp_lvl[1],
-              "xp_pct":xp_pct,
-              "xp_next_lvl":next_lvl,
-              "avatar":user['avatar'],
-              "last_msg":user['last_msg'],
-              "rank":self.db.find_user_rank(user['author'])[0],
-              "user_count":self.db.count_recs(),
-              "rep":user['rep']}
-
+    def user_data(self, plr):
+        user = self.db.get_record(plr)
+        if not user:
+            return False
+        return self.convert_user(user)
 
     # Calculate how much exp is needed to reach a level
     def calc_level_xp(self, lvl):

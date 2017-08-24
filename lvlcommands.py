@@ -69,6 +69,9 @@ class Commands(Helper):
                     "User does not exist in levels database.")
             return
 
+        u_stat.update({"user_count":self.db.count_recs(),
+                       "rank":self.db.find_user_rank(u_stat['author'])})
+
         
         embed = self.discord.Embed(title='', colour=int('008cba', 16))
         embed.add_field(name='Rank',

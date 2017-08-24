@@ -3,29 +3,22 @@
    <head>
       <meta charset="utf-8"/>
       <title>Level Results</title>
-      <link href="static/style.css" type="text/css" rel="stylesheet">
+      <link href="static/reset.css" type="text/css" rel="stylesheet" />
+	  <link href="static/style.css" type="text/css" rel="stylesheet">
       <link href="static/bootstrap.css" type="text/css" rel="stylesheet" />
    </head>
    <body>
       <div class="container">
-         <div class="row">
-            <div class="col-md-9">
-               <h1>Leaderboard</h1>
-               <div class="list-group">
+               <h1>Leaderboard -- obligatory "under construction", as you can see</h1>
                {% set count = 1 -%}
 			   {% for player in results -%} 
-                  <div class="list-group-item">
-                     <div class="row">
-                        <div class="col-md-1 col-sm-1 col-xs-1">
-							<h3><strong>#{{ count }}</strong></h3>
-                        </div>
-                        <div class="col-md-1 col-sm-1 hidden-xs" style="padding:0">
-							<img src="{{ player.avatar }}" width=60 height=60>
-                        </div>
-                        <div class="col-md-4 col-sm-4 col-xs-5">
-							<h3>{{ player.name }} <small>#{{ player.disc }}</small></h3>
-                        </div>
-                        <div class="col-md-4 col-sm-4 col-xs-4">
+				   <div class="row">
+						<div class="admin">
+							<div class="tablecell"> <h3><strong>#{{ count }}</strong></h3> </div>
+							<div class="tablecell"> <img src="{{ player.avatar }}"> </div>
+							<div class="tablecell name"> <h2>{{ player.display }} <small>#{{ player.disc }}</small></h2> </div>
+						</div>
+                        <div class="score">
                            <center>
 							   <h5>{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h5>
                            </center>
@@ -33,16 +26,29 @@
 							   <div class="progress-bar progress-bar-info" style="width: {{ player.xp_pct }}%"></div>
                            </div>
                         </div>
-                        <div class="col-md-2 col-sm-2 col-xs-2">
-							<h3>Level {{ player.level }}</h3>
-                        </div>
+						<div class="level_rep">
+						    <div class="statstable">
+								<div class="statsrow">
+					    	    	<div class="statscell">
+					    	    		<h4>Reputation:</h4>
+					    	    	</div>
+					    	    	<div class="statscell">
+					    	    		<h4>{{ player.rep }} </h4>
+					    	    	</div>
+								</div>
+								<div class="statsrow">
+				                    <div class="statscell">
+					    	    		<h4>Level:</h4>
+						            </div>
+				                    <div class="statscell">
+					    	    		<h4>{{ player.level }}</h4>
+						            </div>
+								</div>
+						    </div>
+						</div>
                      </div>
-                  </div>
 			   {% set count = count + 1 %}
 			   {% endfor %}
-               </div>
-            </div>
-         </div>
       </div>
    </body>
 </html>

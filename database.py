@@ -79,60 +79,91 @@ class Database():
     # Retrieves a single record
     # Input: 'author'
     # Output ('text', int, 'text')
-    def get_record(self, author, field="*"):
+    def get_record(self, uid, field="*"):
         conn = self.connect()
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        get_record = """SELECT {field} FROM {table} WHERE author="{author}"
+        get_record = """SELECT {field} 
+                        FROM {table} 
+                        WHERE uid="{uid}" 
+                        ORDER BY "xp" DESC
                      """.format(table=self.table,
-                                author=author,
+                                uid=uid,
                                 field=field)
         try:
             with conn:
                 cur.execute(get_record)
         except sqlite3.Error as e:
-            print(e)
+            print("sqlite3.Error: ", e)
             return False
-        return cur.fetchone()
+        data = cur.fetchone()
+        if data is None:
+            return False
+        else:
+            return self.convert_data(data)
+
+    def convert_data(self, row):
+        return {
+                "uid":row[0],
+                "author":row[1],
+                "role":row[2],
+                "rep":row[3],
+                "display":row[4],
+                "disc":row[5],
+                "xp":row[6],
+                "avatar":row[7],
+                "last_msg":row[8]}
+
 
     # Will be used for "levels" printout
-    def get_all_record(self, thing="*"):
+    def get_all_record(self):
         conn = self.connect()
         cur = conn.cursor()
-        get_record = """SELECT {thing} from {table} ORDER BY "xp" DESC
-                     """.format(thing=thing, table=self.table)
-        try:
-            with conn:
-                cur.execute(get_record)
-        except sqlite3.Error as e:
-            print(e)
-        return cur.fetchall()
-
-    def find_user_rank(self, target):
-        print("finding user rank for {}".format(target))
-        conn = self.connect()
-        cur = conn.cursor()
-        get_record = """SELECT rowid FROM {table} WHERE author="{author}" ORDER BY "xp" DESC
-                     """.format(table=self.table, author=target)
-        try:
-            with conn:
-                cur.execute(get_record)
-        except sqlite3.Error as e:
-            print(e)
-        return cur.fetchone()
-
-
-    def count_recs(self):
-        conn = self.connect()
-        cur = conn.cursor()
-        get_record = """SELECT * FROM {table};
+        get_record = """SELECT *
+                        FROM {table} 
+                        ORDER BY "xp" DESC
                      """.format(table=self.table)
         try:
             with conn:
                 cur.execute(get_record)
         except sqlite3.Error as e:
             print(e)
-        # Using len() on a larger db might cause some slowdown
-        # I'll refactor if needed
-        return len(cur.fetchall())
+            return False
+
+        data = cur.fetchall()
+        processed_rows = []
+        for row in data:
+            processed_rows.append(self.convert_data(row))
+        return processed_rows
+
+    def find_user_rank(self, target):
+        print("finding user rank for {}".format(target))
+        conn = self.connect()
+        cur = conn.cursor()
+        get_record = """SELECT COUNT(author)
+                        FROM {table} 
+                        ORDER BY "xp" DESC
+                     """.format(table=self.table, author=target)
+        #                WHERE author="{author}"
+        try:
+            with conn:
+                cur.execute(get_record)
+        except sqlite3.Error as e:
+            print(e)
+        data = cur.fetchone()[0]
+        print(data)
+        return cur.fetchone()[0]
+
+
+    def count_recs(self):
+        conn = self.connect()
+        cur = conn.cursor()
+        get_record = """SELECT COUNT(1) FROM {table};
+                     """.format(table=self.table)
+        try:
+            with conn:
+                cur.execute(get_record)
+        except sqlite3.Error as e:
+            print(e)
+        return cur.fetchone()[0]
 
