@@ -1,26 +1,47 @@
-* {outline : 1px dotted black; }
-@media screen and (max-width:800px){    
-    .container img{display:none;}
+html { font-size: 100%; }
+h1 { font-size: 4rem; }
+h2 { font-size: 3rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1rem; }
+
+/* outline around all elements for troubleshooting */
+* {outline : 1px dotted black;}
+ 
+@media screen and (max-width:800px){ html{font-size:95%;}}
+@media screen and (max-width:750px){ html{font-size:90%;}}
+@media screen and (max-width:700px){ html{font-size:80%;}}
+@media screen and (max-width:650px){ html{font-size:70%;}}
+@media screen and (max-width:600px){ 
+	html{font-size:60%;}
+    .pikture {display:none;}
 }
-img {
+@media screen and (max-width:550px){ html{font-size:50%;}}
+@media screen and (max-width:500px){ html{font-size:40%;}}
+@media screen and (max-width:450px){ html{font-size:30%;}}
+@media screen and (max-width:400px){ html{font-size:20%;}}
+@media screen and (max-width:350px){ html{font-size:10%;}}
+
+/* construction banner */
+.const {
+	width: 70vmin;
+}
+.pikture {
 	width: 100px;
 	height: 100px;
 	padding: 0px;
 }
-.divdown {
-	vertical-align: bottom;
-}
 .container {
 	margin: 0 auto;
-	width: 80%;
+	width: 75vw;
 	border-bottom:1px solid #000000;
 }
 .row { 
 	display: flex;
+	self-align: center;
 	justify-content: space-between;
 	width: inherit;
 	padding: 15px;
-	height: 100px;
+	height: 6rem;
 	border-top:1px solid #000000;
 	border-right:1px solid #000000;
 	border-left:1px solid #000000;
@@ -29,25 +50,28 @@ img {
 	height: 100px;
     display: inline-block;
 }
+
+.admin {
+	max-width: 30vw;
+	height: 100%;
+	white-space: normal;
+	align-self: flex-start;
+	display: inline-block;
+}
 .tablecell {
 	display: inline-block;
 	vertical-align: middle;
 }
-.admin {
-	max-width: 20%;
-	white-space: normal;
-	align-self: flex-start;
-}
 .score {
-	width: 50%;
-	self-align: center;
+	width: 50vw;
+	height: 100%;
 	vertical-align: middle;
 }
 .name {
 	padding-left: 10px;
 }
 .level_rep {
-	max-width: 20%;
+	max-width: 15vw;
 	height: 100%;
 	align-self: flex-end;
 	vertical-align: middle;
@@ -61,7 +85,6 @@ img {
 	display: table-row;
 }
 .statscell {
-	font-size: x-large;
 	padding: 10px;
 	display: table-cell;
 	width: 50%;

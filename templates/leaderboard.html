@@ -8,19 +8,19 @@
       <link href="static/bootstrap.css" type="text/css" rel="stylesheet" />
    </head>
    <body>
+	  <center><img src='http://www.pastor-frank.com/wp-content/uploads/2013/02/construction.png' class="const"></center>
       <div class="container">
-               <h1>Leaderboard -- obligatory "under construction", as you can see</h1>
                {% set count = 1 -%}
 			   {% for player in results -%} 
 				   <div class="row">
 						<div class="admin">
 							<div class="tablecell"> <h3><strong>#{{ count }}</strong></h3> </div>
-							<div class="tablecell"> <img src="{{ player.avatar }}"> </div>
-							<div class="tablecell name"> <h2>{{ player.display }} <small>#{{ player.disc }}</small></h2> </div>
+							<div class="tablecell"> <img class="pikture" src="{{ player.avatar }}"> </div>
+							<div class="tablecell name"> <h3><div><div>{{ player.display }}</div><div> <small>#{{ player.disc }}</small></div></h3> </div>
 						</div>
                         <div class="score">
                            <center>
-							   <h5>{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h5>
+							   <h4>{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h4>
                            </center>
                            <div class="progress progress-striped">
 							   <div class="progress-bar progress-bar-info" style="width: {{ player.xp_pct }}%"></div>
@@ -29,20 +29,20 @@
 						<div class="level_rep">
 						    <div class="statstable">
 								<div class="statsrow">
-					    	    	<div class="statscell">
-					    	    		<h4>Reputation:</h4>
-					    	    	</div>
-					    	    	<div class="statscell">
-					    	    		<h4>{{ player.rep }} </h4>
-					    	    	</div>
+				                    <div class="statscell">
+					    	    		<h3>Level:</h3>
+						            </div>
+				                    <div class="statscell">
+					    	    		<h3>{{ player.level }}</h3>
+						            </div>
 								</div>
 								<div class="statsrow">
-				                    <div class="statscell">
-					    	    		<h4>Level:</h4>
-						            </div>
-				                    <div class="statscell">
-					    	    		<h4>{{ player.level }}</h4>
-						            </div>
+					    	    	<div class="statscell">
+					    	    		<h3>Reputation:</h3>
+					    	    	</div>
+					    	    	<div class="statscell">
+					    	    		<h3>{{ player.rep }} </h3>
+					    	    	</div>
 								</div>
 						    </div>
 						</div>
