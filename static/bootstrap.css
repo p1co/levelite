@@ -1,34 +1,38 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:700,300);
 html { font-size: 100%; }
-h1 { font-size: 4rem; }
-h2 { font-size: 3rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1rem; }
+h1 { font-size: 3.5rem; }
+h2 { font-size: 2.4rem; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: .9rem; }
 
 /* outline around all elements for troubleshooting */
-* {outline : 1px dotted black;}
+/** {outline : 1px dotted black;}*/
  
 @media screen and (max-width:800px){ html{font-size:95%;}}
-@media screen and (max-width:750px){ html{font-size:90%;}}
+@media screen and (max-width:750px){
+	html{font-size:90%;}
+	.pikture {display:none;}
+	.name {font-size: 2rem;}
+}
 @media screen and (max-width:700px){ html{font-size:80%;}}
 @media screen and (max-width:650px){ html{font-size:70%;}}
-@media screen and (max-width:600px){ 
-	html{font-size:60%;}
-    .pikture {display:none;}
-}
+/*@media screen and (max-width:600px){ html{font-size:60%;}}
 @media screen and (max-width:550px){ html{font-size:50%;}}
 @media screen and (max-width:500px){ html{font-size:40%;}}
 @media screen and (max-width:450px){ html{font-size:30%;}}
 @media screen and (max-width:400px){ html{font-size:20%;}}
 @media screen and (max-width:350px){ html{font-size:10%;}}
+*/
 
 /* construction banner */
 .const {
 	width: 70vmin;
 }
 .pikture {
-	width: 100px;
-	height: 100px;
+	width: 17vmin;
+	height: 17vmin;
 	padding: 0px;
+	border-radius:50%;
 }
 .container {
 	margin: 0 auto;
@@ -37,14 +41,16 @@ h4 { font-size: 1rem; }
 }
 .row { 
 	display: flex;
-	self-align: center;
-	justify-content: space-between;
+	justify-content: flex-start;
+	align-content: stretch;
+	align-items: center;
+	/*padding: 15px;*/
 	width: inherit;
-	padding: 15px;
-	height: 6rem;
+	height: 100%;
 	border-top:1px solid #000000;
 	border-right:1px solid #000000;
 	border-left:1px solid #000000;
+	border-color: #B3B3B3;
 }
 .cell {
 	height: 100px;
@@ -52,31 +58,39 @@ h4 { font-size: 1rem; }
 }
 
 .admin {
-	max-width: 30vw;
+	flex-grow: 3;
+	flex-basis: 20%;
 	height: 100%;
 	white-space: normal;
 	align-self: flex-start;
 	display: inline-block;
+	margin: auto;
 }
 .tablecell {
 	display: inline-block;
 	vertical-align: middle;
 }
 .score {
-	width: 50vw;
+	flex-basis: 30%;
+	align-self: flex-end;
+	max-width: 30%;
 	height: 100%;
 	vertical-align: middle;
+	margin: auto;
 }
 .name {
 	padding-left: 10px;
 }
+.
 .level_rep {
-	max-width: 15vw;
+	width: 5vw;
 	height: 100%;
 	align-self: flex-end;
 	vertical-align: middle;
+	margin: auto;
 }
 .statstable {
+	/*background-color: #aaa;*/
 	width: 100%;
 	height: 100%;
 	display: table;
@@ -90,11 +104,22 @@ h4 { font-size: 1rem; }
 	width: 50%;
 	height: 50%;
 }
+
+sup {
+    vertical-align: super;
+}
+sub, sup {
+    font-size: 0.6em;
+    line-height: 100%;
+}
+
+
+/* progress bar */
 .progress {
     overflow: hidden;
     height: 21px;
     margin-bottom: 21px;
-    background-color: #f5f5f5;
+	background-color: #f5f5f5;
     border-radius: 0;
     -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -107,7 +132,7 @@ h4 { font-size: 1rem; }
     line-height: 21px;
     color: #ffffff;
     text-align: center;
-    background-color: #008cba;
+	background-color: #008cba;
     -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
     box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
     -webkit-transition: width 0.6s ease;
@@ -119,8 +144,8 @@ h4 { font-size: 1rem; }
     background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-    -webkit-background-size: 40px 40px;
-    background-size: 40px 40px;
+    -webkit-background-size: 20px 20px;
+    background-size: 20px 20px;
 }
 .progress.active .progress-bar,
 .progress-bar.active {
@@ -129,7 +154,7 @@ h4 { font-size: 1rem; }
     animation: progress-bar-stripes 2s linear infinite;
 }
 .progress-bar-success {
-    background-color: #43ac6a;
+	background-color: #43ac6a;
 }
 .progress-striped .progress-bar-success {
     background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -137,7 +162,8 @@ h4 { font-size: 1rem; }
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .progress-bar-info {
-    background-color: #5bc0de;
+    /*background-color: #5bc0de;*/
+    background-color: #404040;
 }
 .progress-striped .progress-bar-info {
     background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);

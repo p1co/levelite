@@ -16,11 +16,11 @@
 						<div class="admin">
 							<div class="tablecell"> <h3><strong>#{{ count }}</strong></h3> </div>
 							<div class="tablecell"> <img class="pikture" src="{{ player.avatar }}"> </div>
-							<div class="tablecell name"> <h3><div><div>{{ player.display }}</div><div> <small>#{{ player.disc }}</small></div></h3> </div>
+							<div class="tablecell name"> <h3><div><div>{{ player.display }}</div><div> <sup>#{{ player.disc }}</sup></div></h3> </div>
 						</div>
                         <div class="score">
                            <center>
-							   <h4>{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h4>
+							   <h4 style="padding:5px">{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h4>
                            </center>
                            <div class="progress progress-striped">
 							   <div class="progress-bar progress-bar-info" style="width: {{ player.xp_pct }}%"></div>
