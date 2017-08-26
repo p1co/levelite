@@ -10,20 +10,33 @@
    <body>
 	  <center><img src='http://www.pastor-frank.com/wp-content/uploads/2013/02/construction.png' class="const"></center>
       <div class="container">
-               {% set count = 1 -%}
-			   {% for player in results -%} 
+               {%- set count = 1 -%}
+			   {%- for player in results -%} 
 				   <div class="row">
+					    <div class="rank"><h3>#{{ count }}</h3></div>
 						<div class="admin">
-							<div class="tablecell"> <h3><strong>#{{ count }}</strong></h3> </div>
-							<div class="tablecell"> <img class="pikture" src="{{ player.avatar }}"> </div>
-							<div class="tablecell name"> <h3><div><div>{{ player.display }}</div><div> <sup>#{{ player.disc }}</sup></div></h3> </div>
+							<!--<div class="tablecell"> <h3><strong>#{{ count }}</strong></h3> </div>-->
+							<div class="tablecell"> <img class="pikture" src="
+								{%- if player.avatar %}{{ player.avatar }}{% endif -%}
+								{%- if not player.avatar %}static/q.gif{% endif -%}"></div>
+							<div class="tablecell name"> <h3>
+									<div>
+										<div 
+											{%- if player.display|length > 8 %} style="font-size:60%"{% endif -%}
+											{%- if player.display|length > 10 %} style="font-size:50%"{% endif -%}
+											{%- if player.display|length > 12 %} style="font-size:40%"{% endif -%}
+											{%- if player.display|length > 14 %} style="font-size:30%"{% endif -%}
+											{%- if player.display|length > 16 %} style="font-size:20%"{% endif -%}
+											>{{ player.display }}</div>
+										<div> <center><sup>#{{ player.disc }}</sup></center></div></h3>
+									</div>
 						</div>
                         <div class="score">
                            <center>
 							   <h4 style="padding:5px">{{ player.xp_in_lvl }} / {{ player.xp_next_lvl }} <strong>XP</strong> [{{ player.xp }} total]</h4>
                            </center>
-                           <div class="progress progress-striped">
-							   <div class="progress-bar progress-bar-info" style="width: {{ player.xp_pct }}%"></div>
+                           <div id="progressbar">
+							   <div style="width: {{ player.xp_pct }}%"></div>
                            </div>
                         </div>
 						<div class="level_rep">
