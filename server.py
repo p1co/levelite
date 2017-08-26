@@ -17,7 +17,7 @@ class Server(Helper):
         return self.TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
     def get_users(self):
-        return self.db.get_all_record()
+        return self.db.get_all_record(99)
 
     def create_index_html(self, results):
         context = { 'results': results }

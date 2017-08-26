@@ -103,6 +103,10 @@ class Database():
             return self.convert_data(data)
 
     def convert_data(self, row):
+        if "discordapp.com" not in row[7]:
+            avatar = None
+        else:
+            avatar = row[7]
         return {
                 "uid":row[0],
                 "author":row[1],
@@ -111,18 +115,19 @@ class Database():
                 "display":row[4],
                 "disc":row[5],
                 "xp":row[6],
-                "avatar":row[7],
+                "avatar":avatar,
                 "last_msg":row[8]}
 
 
     # Will be used for "levels" printout
-    def get_all_record(self):
+    def get_all_record(self, limit="*"):
         conn = self.connect()
         cur = conn.cursor()
         get_record = """SELECT *
                         FROM {table} 
                         ORDER BY "xp" DESC
-                     """.format(table=self.table)
+                        LIMIT {limit}
+                     """.format(table=self.table, limit=limit)
         try:
             with conn:
                 cur.execute(get_record)
